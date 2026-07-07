@@ -55,7 +55,14 @@ A clean live run prints `Summary: N/N passed across 1 agent(s)` and exits `0`. R
 - `action.yml` **must** stay at repo root. Moving it into a subdirectory removes the "Publish this Action to the GitHub Marketplace" checkbox from the Release page.
 - `action.yml` must declare all four Marketplace fields at the top level: `name`, `description`, `author`, `branding` (with both `icon` and `color`).
 - The `name` (`AI Smoke Test`) must be unique across the Marketplace. If a collision appears at publish time, fall back to `AI Agent Smoke Test`.
+- **`description` must be < 125 characters.** The Marketplace publish form rejects anything longer. Keep the current short form (`Smoke-test Azure AI Foundry hosted agents: POST prompts from a JSON catalog and assert on the reply text.`) unless a rewrite fits in the same budget.
 - Never delete or rename `LICENSE` — Marketplace requires an OSI license file.
+
+### Marketplace listing metadata (categories + tags)
+- Categories and tags are **not** in `action.yml`; they are set per-release in the GitHub UI (Release page → Marketplace section, or **Edit release** on an existing release).
+- The Marketplace listing shows the metadata from the **most recent published release**. Edit the latest release to change what visitors see — no need to cut a new tag.
+- **Categories:** primary `Deployment`, secondary `Testing`. Do not swap these silently between releases; users filter by category.
+- **Tags:** always apply the curated set from [docs/publishing.md](../docs/publishing.md#categories-and-tags). Do not invent new tags per release, and never add tags for frameworks or protocols the action does not actually work against.
 
 ### Composite action rules
 - **No `${{ inputs.* }}` interpolation in `run:` shell strings.** Every input reaches the shell via an `env:` var. This is an injection-hardening rule — inputs on a public action are attacker-controllable.
