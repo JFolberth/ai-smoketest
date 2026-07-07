@@ -8,7 +8,11 @@ Smoke-test an Azure AI Foundry hosted agent by POSTing prompts from a JSON catal
 
 Use this action as a post-deploy gate in your CI/CD: it fails the job the moment your hosted agent stops answering, drifts off its system prompt, breaks conversation threading, or returns malformed Responses payloads.
 
+> **New here?** Start with the companion blog post: [Smoke Test Microsoft Foundry Agents with GitHub Actions](https://techcommunity.microsoft.com/blog/azuredevcommunityblog/smoke-test-microsoft-foundry-agents-with-github-actions/4531912) — it walks through why smoke tests matter for hosted agents, the scenario patterns this action was built for, and how it fits into the Agent Development Lifecycle. See also [Further reading](#further-reading) at the bottom.
+
 **Works with any hosted agent, regardless of how it was built.** The runner only talks to the Foundry Responses data-plane endpoint — it does not import any Azure or agent SDK. It does not matter whether the agent is a prompt-only agent (system prompt + model, no custom code), or was authored with the Microsoft Agent Framework, Semantic Kernel, LangChain, or LlamaIndex; whether it was defined declaratively, deployed from source code, or shipped as a container image. If it responds on `POST {project_endpoint}/agents/{agent_name}/endpoint/protocols/openai/responses`, this action can smoke-test it.
+
+> **Scope: Responses API only.** This action is intentionally locked to the OpenAI Responses protocol as exposed by Foundry Hosted Agents. It does **not** target the Azure OpenAI Assistants API (`/threads/{id}/runs`, `/threads/{id}/messages`), a self-hosted `invoke` endpoint (Container Apps, Azure Functions, etc.), or the legacy Azure AI Agents `invoke` pattern. If your agent is not reachable at `.../endpoint/protocols/openai/responses`, this action is not the right tool.
 
 ---
 
