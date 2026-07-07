@@ -42,15 +42,51 @@ On the Release page:
 
 1. Tick the checkbox **"Publish this Action to the GitHub Marketplace"**. If the checkbox is missing, `action.yml` is either not at the repo root or is missing `branding` — fix and re-tag.
 2. Accept the Marketplace terms of service (first time only).
-3. **Primary category:** *Deployment*. **Secondary category:** *Testing*.
+3. Set **Categories** and **Tags** as described in the next section.
 4. Preview the listing — confirm the icon renders and the description reads well.
 5. Click **Publish release**.
 
 The listing appears at `https://github.com/marketplace/actions/<name-slug>` within a few minutes.
 
+## Categories and tags
+
+Neither categories nor tags live in `action.yml` — they are set per-release in the GitHub UI. The Marketplace listing shows whatever the **most recent published release** has, so editing the latest release's Marketplace section is the way to change what visitors see (no need to cut a new tag or move `v1`).
+
+**Categories** — pick 1 (primary) or 2 (primary + secondary) from GitHub's fixed dropdown:
+
+- **Primary:** `Deployment`
+- **Secondary:** `Testing`
+
+`Continuous integration` is a reasonable alternate for the primary slot if a future release repositions the action as a CI-first tool rather than a post-deploy gate.
+
+**Tags** — free-form keywords, up to 20, comma-separated. Use the curated set below on every release so search discoverability stays consistent:
+
+```
+azure, azure-ai, azure-ai-foundry, foundry, hosted-agents, ai-agents, agent-framework, semantic-kernel, responses-api, openai, llm, gen-ai, smoke-tests, smoke-testing, post-deploy, deployment-gate, ci-cd
+```
+
+Rationale for the picks:
+
+- **Platform surface** (`azure`, `azure-ai`, `azure-ai-foundry`, `foundry`) — covers every way people search for the platform.
+- **Agent surface** (`hosted-agents`, `ai-agents`, `agent-framework`, `semantic-kernel`) — the action is SDK-agnostic, so `agent-framework` and `semantic-kernel` are included as *discoverability aids*, not as a supported-frameworks claim.
+- **Protocol** (`responses-api`, `openai`) — the action targets the OpenAI Responses protocol as exposed by Foundry.
+- **Category signal** (`llm`, `gen-ai`) — helps in cross-category browsing.
+- **Function** (`smoke-tests`, `smoke-testing`, `post-deploy`, `deployment-gate`, `ci-cd`) — describes what the action *does*.
+
+Do **not** add tags for frameworks or protocols the action does not actually work against (e.g. `assistants-api`, `langchain-server`, `bedrock`) — they mislead searchers and hurt the listing's trust.
+
+## Editing an existing release's listing metadata
+
+Categories, tags, and the Marketplace publish state can all be edited without re-tagging:
+
+1. Repo → **Releases** → click the release currently powering the listing (usually the latest `v1.x.y`).
+2. Click **Edit release**.
+3. Scroll to the Marketplace section and update the fields.
+4. Click **Update release**. The Marketplace listing refreshes within a few minutes.
+
 ## Subsequent releases
 
-For patch and minor releases, repeat the tag + force-move + create-release steps above. On each Release page, tick "Publish this Action to the GitHub Marketplace" again; the listing metadata updates immediately.
+For patch and minor releases, repeat the tag + force-move + create-release steps above. On each Release page, tick "Publish this Action to the GitHub Marketplace" again and re-apply the categories + tag list from the previous section; the listing metadata updates immediately.
 
 For a major bump (`v2.0.0`), create a new moving tag `v2` and leave `v1` where it is. Callers on `@v1` are unaffected until they opt in.
 
