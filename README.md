@@ -8,6 +8,28 @@ Smoke-test an Azure AI Foundry hosted agent by POSTing prompts from a JSON catal
 
 Use this action as a post-deploy gate in your CI/CD: it fails the job the moment your hosted agent stops answering, drifts off its system prompt, breaks conversation threading, or returns malformed Responses payloads.
 
+**Works with any hosted agent, regardless of how it was built.** The runner only talks to the Foundry Responses data-plane endpoint — it does not import any Azure or agent SDK. It does not matter whether the agent is a prompt-only agent (system prompt + model, no custom code), or was authored with the Microsoft Agent Framework, Semantic Kernel, LangChain, or LlamaIndex; whether it was defined declaratively, deployed from source code, or shipped as a container image. If it responds on `POST {project_endpoint}/agents/{agent_name}/endpoint/protocols/openai/responses`, this action can smoke-test it.
+
+---
+
+## Why smoke test a hosted agent?
+
+Deploying a hosted agent "successfully" only proves the control plane accepted the definition — it does not prove the agent actually answers. The [companion blog post](https://techcommunity.microsoft.com/blog/azuredevcommunityblog/smoke-test-microsoft-foundry-agents-with-github-actions/4531912) walks through the motivation in detail; the short version:
+
+- **Fail fast.** Agents can deploy green and still be silent — a missing dependency, a bad model routing, or an expired connection can leave a "healthy" agent that returns nothing when prompted. A smoke test surfaces that in seconds instead of at the first user report.
+- **Fast + cheap gate.** Full evaluations (grounding, safety, tool-use scoring) are slow and expensive to run on every deploy. Smoke tests are a lightweight first gate: cheap enough to run on every merge, thorough enough to catch broken deployments, auth regressions, prompt-instruction regressions, and threading breakage.
+- **Not a replacement for evaluations — a complement.** Smoke tests answer "is the agent reachable, responding, and following the most basic prompt expectations?". Evaluations answer "how good is the response?". You want both; you can afford to run the first one on every deploy.
+- **Repeatable and portable.** The same JSON catalog runs against every agent you point it at — swap the `agent_name` input to smoke-test a canary, a staging deployment, and production in the same workflow.
+
+Typical scenarios worth encoding as smoke tests (all supported by the catalog schema below):
+
+- An on-topic response with expected keywords.
+- Thread continuity via `previous_response_id` (stateless chaining).
+- Conversation continuity via a platform-managed conversation resource (stateful).
+- Refusal of an off-topic question, and no leaking of the off-topic answer.
+- Rejection of a fabricated premise (basic hallucination resistance).
+- Context-dependent questions where the agent should qualify its answer instead of guessing.
+
 ---
 
 ## What it does
@@ -19,7 +41,7 @@ Use this action as a post-deploy gate in your CI/CD: it fails the job the moment
 - Runs the same catalog against multiple agents in one invocation (comma-separated `agent_name`).
 - Exits `0` on all-pass, `1` on any assertion failure, `2` on runner error.
 
-Zero pip dependencies — the runner is pure stdlib Python 3.
+Zero pip dependencies — the runner is pure stdlib Python 3. No SDK coupling — it speaks the Responses HTTP contract directly, so it stays compatible with any framework that deploys to Foundry Hosted Agents.
 
 ---
 
@@ -93,7 +115,28 @@ The calling job must, before this action runs:
    - `azure/login@v3` — the runner shells out to `az account get-access-token --resource https://ai.azure.com/`. Recommended for GitHub-hosted runners using OIDC.
    - `FOUNDRY_TOKEN` environment variable — a pre-acquired bearer token scoped to `https://ai.azure.com/`. Useful when the runner does not have the Azure CLI installed.
 
-The token principal needs data-plane read/write on the target Foundry project (grant `Azure AI User` — GUID `53ca6127-db72-4b80-b1b0-d745d6d5456d` — at project scope).
+### Permissions the runner identity needs
+
+The identity behind the bearer token (the app registration federated to your GitHub OIDC subject, the workflow's service principal, or whoever produced the `FOUNDRY_TOKEN`) needs **data-plane read/write on the target Foundry project** so it can call both `POST /agents/{name}/endpoint/protocols/openai/responses` (every test) and `POST /agents/{name}/endpoint/protocols/openai/conversations` (any test that uses `create_conversation_as`).
+
+The minimum built-in role that grants this is **`Azure AI User`** (role definition GUID `53ca6127-db72-4b80-b1b0-d745d6d5456d`). Grant it **at Foundry project scope** — narrower than the account or subscription, which keeps the smoke-test identity from touching unrelated projects.
+
+Grant it with the Azure CLI:
+
+```bash
+az role assignment create \
+  --assignee <object-id-or-appId-of-runner-identity> \
+  --role "Azure AI User" \
+  --scope "/subscriptions/<sub>/resourceGroups/<rg>/providers/Microsoft.CognitiveServices/accounts/<account>/projects/<project>"
+```
+
+Notes:
+
+- **Scope matters.** `Azure AI User` at the Foundry *account* or *resource group* scope also works, but grants access to every project under that scope. Prefer project scope for CI identities.
+- **Wrong token audience → 401.** The audience must be `https://ai.azure.com/`. Tokens issued for `https://cognitiveservices.azure.com/` are rejected by the Responses endpoint even when the identity has the right role.
+- **Missing role → 403.** If the token is well-formed but the identity is not assigned `Azure AI User` (or an equivalent higher-privilege role) on the project, the first `POST /responses` returns `403` and the runner exits with code `1`.
+- **Wrong project or agent name → 404.** Check the `project_endpoint` and `agent_name` inputs against your deployment outputs.
+- **No control-plane permissions needed.** The runner never calls management.azure.com; it only hits the Foundry data plane. Roles like `Contributor` on the resource group are unnecessary and over-privileged.
 
 ---
 
@@ -159,6 +202,12 @@ See [`CONTRIBUTING.md`](./CONTRIBUTING.md). The repo ships a devcontainer with P
 Bug reports and feature requests: use the [issue templates](https://github.com/JFolberth/ai-smoketest/issues/new/choose).
 
 Security issues: see [`SECURITY.md`](./SECURITY.md).
+
+---
+
+## Further reading
+
+- [Smoke Test Microsoft Foundry Agents with GitHub Actions](https://techcommunity.microsoft.com/blog/azuredevcommunityblog/smoke-test-microsoft-foundry-agents-with-github-actions/4531912) — the companion blog post: what smoke tests are for agents, why they belong in the Agent Development Lifecycle, and how they complement (rather than replace) evaluations.
 
 ---
 

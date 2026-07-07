@@ -17,16 +17,24 @@ If the desired `name` is taken, fall back to `AI Agent Smoke Test`.
 
 ## Cutting a release
 
+Releases are cut manually. There is no release workflow.
+
 1. Ensure `main` is green.
-2. Tag and push:
+2. Tag the release commit and push the tag:
    ```bash
    git tag v1.0.0
    git push origin v1.0.0
    ```
-3. The `release.yml` workflow runs on the tag push and does two things:
-   - Force-updates the `v1` moving major tag to point at the same commit.
-   - Creates a GitHub Release with auto-generated notes.
-4. Open the newly-created Release in the GitHub UI.
+3. Force-move the `vMAJOR` moving tag to the same commit so callers pinned to `@v1` pick up the release:
+   ```bash
+   git tag -f v1 v1.0.0
+   git push origin v1 --force
+   ```
+4. Create the GitHub Release from the tag (UI: **Releases → Draft a new release →** pick `v1.0.0`, click **Generate release notes**, publish). Or from the CLI:
+   ```bash
+   gh release create v1.0.0 --generate-notes
+   ```
+5. Open the newly-created Release in the GitHub UI.
 
 ## Publishing to the Marketplace
 
@@ -42,19 +50,24 @@ The listing appears at `https://github.com/marketplace/actions/<name-slug>` with
 
 ## Subsequent releases
 
-For patch and minor releases, the same tag-push flow works — the release workflow moves `v1` automatically. On each Release page, tick "Publish this Action to the GitHub Marketplace" again; the listing metadata updates immediately.
+For patch and minor releases, repeat the tag + force-move + create-release steps above. On each Release page, tick "Publish this Action to the GitHub Marketplace" again; the listing metadata updates immediately.
 
-For a major bump (`v2.0.0`), the release workflow will create a new moving tag `v2` and leave `v1` where it is. Callers on `@v1` are unaffected until they opt in.
+For a major bump (`v2.0.0`), create a new moving tag `v2` and leave `v1` where it is. Callers on `@v1` are unaffected until they opt in.
 
 ## Hotfix workflow
 
-If a release needs to be re-issued (e.g. wrong commit tagged):
+If a release needs to be re-issued (e.g. wrong commit tagged), delete the bad tag locally and remotely, re-tag the correct commit, force-move `vMAJOR`, and recreate the release:
 
 ```bash
-gh workflow run release.yml -f tag=v1.0.1
+git tag -d v1.0.1
+git push origin :refs/tags/v1.0.1
+git tag v1.0.1 <good-sha>
+git push origin v1.0.1
+git tag -f v1 v1.0.1
+git push origin v1 --force
+gh release delete v1.0.1 --yes 2>/dev/null || true
+gh release create v1.0.1 --generate-notes
 ```
-
-This runs the release job for an existing tag without needing a new tag push. It moves `v1` to that tag and creates the release if it doesn't already exist.
 
 ## References
 

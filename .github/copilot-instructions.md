@@ -15,7 +15,6 @@ A GitHub Marketplace Action that smoke-tests Azure AI Foundry hosted agents by P
 | [tests/test_smoke_tests.py](../tests/test_smoke_tests.py) | Pure-function unit tests for `extract_text`, `check_assertions`, `_ascii_fold`. No network. |
 | [tests/check_readme_inputs.py](../tests/check_readme_inputs.py) | CI guard: every `action.yml` input must appear backtick-wrapped in `README.md`. Runs in the `readme-inputs-sync` job. |
 | [.github/workflows/ci.yml](../.github/workflows/ci.yml) | 4 jobs: `lint-action` (actionlint + yamllint), `lint-python` (ruff + compileall), `unit-tests` (pytest), `readme-inputs-sync`. |
-| [.github/workflows/release.yml](../.github/workflows/release.yml) | On `v*.*.*` tag push or `workflow_dispatch`: validates semver, force-moves the `vMAJOR` moving tag, creates a GitHub Release with auto-generated notes. |
 | [.devcontainer/](../.devcontainer/) | Python 3.12 + Azure CLI + GitHub CLI. `postCreateCommand` installs `ruff`, `pytest`, `pyyaml`, and `actionlint` (via [install-actionlint.sh](../.devcontainer/install-actionlint.sh)). |
 
 The runner is the source of truth for the HTTP contract with the Foundry data plane — **not** `az cognitiveservices agent invoke` (which does not exist for hosted agents' Responses endpoint).
@@ -79,9 +78,9 @@ A clean live run prints `Summary: N/N passed across 1 agent(s)` and exits `0`. R
 - Missing assertion keys are silently skipped, not failed — this is the promise that lets old catalogs keep working when the schema grows.
 
 ### Semver + release flow
-- Tag `vMAJOR.MINOR.PATCH` on `main`. The release workflow validates the shape, force-moves `vMAJOR`, and creates a GitHub Release with auto-generated notes.
+- Releases are cut **manually** — there is no release workflow. Tag `vMAJOR.MINOR.PATCH` on `main`, force-move the `vMAJOR` moving tag to the same commit, and create the GitHub Release (see [docs/publishing.md](../docs/publishing.md) for the exact commands).
 - Callers pin `@v1` (moving) or `@v1.0.0` (immutable). Never advertise `@main` in docs.
-- Hotfix path: `gh workflow run release.yml -f tag=v1.0.1` re-publishes an existing tag without needing a new commit.
+- Hotfix path: delete the bad tag locally and remotely, re-tag the correct commit, force-move `vMAJOR`, and recreate the release with `gh release create`.
 
 ### CI expectations
 - All four CI jobs (`lint-action`, `lint-python`, `unit-tests`, `readme-inputs-sync`) must pass before merge. There is no `main`-only guard — enforce via branch protection.
