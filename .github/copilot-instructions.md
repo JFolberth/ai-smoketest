@@ -58,11 +58,11 @@ A clean live run prints `Summary: N/N passed across 1 agent(s)` and exits `0`. R
 - **`description` must be < 125 characters.** The Marketplace publish form rejects anything longer. Keep the current short form (`Smoke-test Azure AI Foundry hosted agents: POST prompts from a JSON catalog and assert on the reply text.`) unless a rewrite fits in the same budget.
 - Never delete or rename `LICENSE` — Marketplace requires an OSI license file.
 
-### Marketplace listing metadata (categories + tags)
-- Categories and tags are **not** in `action.yml`; they are set per-release in the GitHub UI (Release page → Marketplace section, or **Edit release** on an existing release).
-- The Marketplace listing shows the metadata from the **most recent published release**. Edit the latest release to change what visitors see — no need to cut a new tag.
-- **Categories:** primary `Deployment`, secondary `Testing`. Do not swap these silently between releases; users filter by category.
-- **Tags:** always apply the curated set from [docs/publishing.md](../docs/publishing.md#categories-and-tags). Do not invent new tags per release, and never add tags for frameworks or protocols the action does not actually work against.
+### Marketplace listing metadata (categories only)
+- Categories are **not** in `action.yml`; they are set per-release in the GitHub UI (Release page → Marketplace section, or **Edit release** on an existing release).
+- The Marketplace listing shows the categories from the **most recent published release**. Edit the latest release to change what visitors see — no need to cut a new tag.
+- **Categories:** primary `Testing`, secondary `Continuous integration`. Do not swap these silently between releases; users filter by category.
+- **There is no free-form tags/keywords field for Actions on the Marketplace** (that is a GitHub Apps feature). If someone asks about tags, the answer is: only the two category dropdowns exist.
 
 ### Composite action rules
 - **No `${{ inputs.* }}` interpolation in `run:` shell strings.** Every input reaches the shell via an `env:` var. This is an injection-hardening rule — inputs on a public action are attacker-controllable.

@@ -42,42 +42,28 @@ On the Release page:
 
 1. Tick the checkbox **"Publish this Action to the GitHub Marketplace"**. If the checkbox is missing, `action.yml` is either not at the repo root or is missing `branding` — fix and re-tag.
 2. Accept the Marketplace terms of service (first time only).
-3. Set **Categories** and **Tags** as described in the next section.
+3. Set **Categories** as described in the next section.
 4. Preview the listing — confirm the icon renders and the description reads well.
 5. Click **Publish release**.
 
 The listing appears at `https://github.com/marketplace/actions/<name-slug>` within a few minutes.
 
-## Categories and tags
+## Categories
 
-Neither categories nor tags live in `action.yml` — they are set per-release in the GitHub UI. The Marketplace listing shows whatever the **most recent published release** has, so editing the latest release's Marketplace section is the way to change what visitors see (no need to cut a new tag or move `v1`).
+Categories are the **only** free-form listing metadata GitHub Actions expose on the Marketplace — there is no separate tags/keywords field (that is a GitHub Apps feature, not an Actions feature). Categories are not stored in `action.yml`; they are set per-release in the GitHub UI, and the Marketplace listing reflects whatever the **most recent published release** has.
 
-**Categories** — pick 1 (primary) or 2 (primary + secondary) from GitHub's fixed dropdown:
+Pick up to 2 from GitHub's fixed dropdown:
 
-- **Primary:** `Deployment`
-- **Secondary:** `Testing`
+- **Primary category:** `Testing` — smoke tests are, first and foremost, testing.
+- **Another category:** `Continuous integration` — reflects the action's primary use as a post-deploy gate inside CI workflows.
 
-`Continuous integration` is a reasonable alternate for the primary slot if a future release repositions the action as a CI-first tool rather than a post-deploy gate.
+`Deployment` is a reasonable alternate for the secondary slot if a future release repositions the action as a deployment tool rather than a testing tool, but do not silently swap categories between releases — users filter listings by category, and churn hurts discoverability.
 
-**Tags** — free-form keywords, up to 20, comma-separated. Use the curated set below on every release so search discoverability stays consistent:
-
-```
-azure, azure-ai, azure-ai-foundry, foundry, hosted-agents, ai-agents, agent-framework, semantic-kernel, responses-api, openai, llm, gen-ai, smoke-tests, smoke-testing, post-deploy, deployment-gate, ci-cd
-```
-
-Rationale for the picks:
-
-- **Platform surface** (`azure`, `azure-ai`, `azure-ai-foundry`, `foundry`) — covers every way people search for the platform.
-- **Agent surface** (`hosted-agents`, `ai-agents`, `agent-framework`, `semantic-kernel`) — the action is SDK-agnostic, so `agent-framework` and `semantic-kernel` are included as *discoverability aids*, not as a supported-frameworks claim.
-- **Protocol** (`responses-api`, `openai`) — the action targets the OpenAI Responses protocol as exposed by Foundry.
-- **Category signal** (`llm`, `gen-ai`) — helps in cross-category browsing.
-- **Function** (`smoke-tests`, `smoke-testing`, `post-deploy`, `deployment-gate`, `ci-cd`) — describes what the action *does*.
-
-Do **not** add tags for frameworks or protocols the action does not actually work against (e.g. `assistants-api`, `langchain-server`, `bedrock`) — they mislead searchers and hurt the listing's trust.
+The full category list GitHub currently offers: `API management`, `Chat`, `Code quality`, `Code review`, `Continuous integration`, `Dependency management`, `Deployment`, `Desktop tools`, `IDEs`, `Learning`, `Localization`, `Mobile`, `Monitoring`, `Project management`, `Publishing`, `Security`, `Support`, `Testing`, `Utilities`.
 
 ## Editing an existing release's listing metadata
 
-Categories, tags, and the Marketplace publish state can all be edited without re-tagging:
+The Marketplace publish state and both categories can be changed without re-tagging or cutting a new release:
 
 1. Repo → **Releases** → click the release currently powering the listing (usually the latest `v1.x.y`).
 2. Click **Edit release**.
@@ -86,7 +72,7 @@ Categories, tags, and the Marketplace publish state can all be edited without re
 
 ## Subsequent releases
 
-For patch and minor releases, repeat the tag + force-move + create-release steps above. On each Release page, tick "Publish this Action to the GitHub Marketplace" again and re-apply the categories + tag list from the previous section; the listing metadata updates immediately.
+For patch and minor releases, repeat the tag + force-move + create-release steps above. On each Release page, tick "Publish this Action to the GitHub Marketplace" again and re-apply the same categories; the listing metadata updates immediately.
 
 For a major bump (`v2.0.0`), create a new moving tag `v2` and leave `v1` where it is. Callers on `@v1` are unaffected until they opt in.
 
