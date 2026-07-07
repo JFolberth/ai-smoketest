@@ -11,7 +11,7 @@ A GitHub Marketplace Action that smoke-tests Azure AI Foundry hosted agents by P
 | [action.yml](../action.yml) | Composite `action.yml` at repo root (Marketplace requires root location). Declares 4 inputs and one bash step that fans out comma-separated `agent_name` into repeated `--agent-name` flags, then invokes the bundled runner via `${GITHUB_ACTION_PATH}/scripts/smoke-tests.py`. |
 | [scripts/smoke-tests.py](../scripts/smoke-tests.py) | The runner. Pure Python 3.12 stdlib. POSTs to `{project_endpoint}/agents/{agent_name}/endpoint/protocols/openai/responses?api-version=2025-11-15-preview`. Assertion matchers: `contains_any`, `contains_all`, `contains_none` (case-insensitive substring, smart-quote folded). Threading via `previous_response_id` or `conversation` id. |
 | [examples/smoke-tests.json](../examples/smoke-tests.json) | Copy-paste catalog template (2 tests: single-turn + threaded). Not an implicit default — `tests_file` input is required. |
-| [examples/workflow.yml](../examples/workflow.yml) | Copy-paste sample workflow showing `actions/checkout@v6` → `azure/login@v3` (OIDC) → this action. |
+| [examples/workflow.yml](../examples/workflow.yml) | Copy-paste sample workflow showing `actions/checkout@v7` → `azure/login@v3` (OIDC) → this action. |
 | [tests/test_smoke_tests.py](../tests/test_smoke_tests.py) | Pure-function unit tests for `extract_text`, `check_assertions`, `_ascii_fold`. No network. |
 | [tests/check_readme_inputs.py](../tests/check_readme_inputs.py) | CI guard: every `action.yml` input must appear backtick-wrapped in `README.md`. Runs in the `readme-inputs-sync` job. |
 | [.github/workflows/ci.yml](../.github/workflows/ci.yml) | 4 jobs: `lint-action` (actionlint + yamllint), `lint-python` (ruff + compileall), `unit-tests` (pytest), `readme-inputs-sync`. |
@@ -89,11 +89,11 @@ A clean live run prints `Summary: N/N passed across 1 agent(s)` and exits `0`. R
 - `actionlint` is installed in the CI job via the same `install-actionlint.sh` script the devcontainer uses. Keep the script's version pin (`ACTIONLINT_VERSION`) in one place — do not fork the install into per-workflow inline curls.
 
 ### GitHub Actions — minimum versions
-Use the major-version tag (`@v6`) which floats to the latest patch. Do not use anything older than the minimums below.
+Use the major-version tag (e.g. `@v7`) which floats to the latest patch. Do not use anything older than the minimums below.
 
 | Action | Minimum |
 |---|---|
-| `actions/checkout` | `v6` |
+| `actions/checkout` | `v7` |
 | `actions/setup-python` | `v6` |
 | `azure/login` | `v3` |
 

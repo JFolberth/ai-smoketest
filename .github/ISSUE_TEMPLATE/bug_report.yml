@@ -3,10 +3,6 @@ description: Report a defect in the action, the runner script, or the catalog sc
 title: "[bug] "
 labels: ["bug", "triage"]
 body:
-  - type: markdown
-    attributes:
-      value: |
-        Thanks for filing a bug. Please fill in every section — missing repro details are the number-one reason bugs stall.
   - type: input
     id: action_version
     attributes:
@@ -15,73 +11,17 @@ body:
       placeholder: v1
     validations:
       required: true
-  - type: dropdown
-    id: runner_os
+  - type: textarea
+    id: what_happened
     attributes:
-      label: Runner OS
-      options:
-        - ubuntu-latest
-        - ubuntu-24.04
-        - ubuntu-22.04
-        - macos-latest
-        - windows-latest
-        - self-hosted
-        - other (specify in extra context)
+      label: What happened?
+      description: What you expected, what you got, and any relevant log excerpts (include the `Summary:` line if you have it). Redact secrets.
     validations:
       required: true
   - type: textarea
-    id: workflow_snippet
+    id: repro
     attributes:
-      label: Workflow snippet
-      description: The step (and any surrounding auth steps) as it appears in your workflow. Redact secrets.
-      render: yaml
-      placeholder: |
-        - uses: actions/checkout@v6
-        - uses: azure/login@v3
-          with:
-            client-id: ${{ secrets.AZURE_CLIENT_ID }}
-            tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-            subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-        - uses: JFolberth/ai-smoketest@v1
-          with:
-            project_endpoint: https://...
-            agent_name: my-agent
-            tests_file: tests/smoke-tests.json
-    validations:
-      required: true
-  - type: textarea
-    id: catalog_snippet
-    attributes:
-      label: Catalog entry that triggers the bug
-      description: The failing test object (or a minimised catalog that reproduces the issue). Redact any sensitive prompts.
-      render: json
-    validations:
-      required: true
-  - type: textarea
-    id: expected
-    attributes:
-      label: Expected behaviour
-    validations:
-      required: true
-  - type: textarea
-    id: actual
-    attributes:
-      label: Actual behaviour
-      description: What you saw, including exit code and any noteworthy log lines.
-    validations:
-      required: true
-  - type: textarea
-    id: logs
-    attributes:
-      label: Log excerpt
-      description: 'The relevant runner output. Include the `--- Agent: ... ---` header and the `Summary:` line.'
-      render: text
-    validations:
-      required: true
-  - type: textarea
-    id: extra
-    attributes:
-      label: Additional context
-      description: Anything else — related issues, workarounds you tried, model deployment name, etc.
+      label: How to reproduce
+      description: Minimal workflow step and/or catalog entry that triggers the bug.
     validations:
       required: false

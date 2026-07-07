@@ -40,7 +40,7 @@ jobs:
   smoke:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Azure login (OIDC)
         uses: azure/login@v3
@@ -87,7 +87,7 @@ The calling job must, before this action runs:
 
 1. **Check out the caller's repository** — this action needs to read `tests_file` from the runner filesystem.
    ```yaml
-   - uses: actions/checkout@v6
+   - uses: actions/checkout@v7
    ```
 2. **Provide a Foundry data-plane token** via one of:
    - `azure/login@v3` — the runner shells out to `az account get-access-token --resource https://ai.azure.com/`. Recommended for GitHub-hosted runners using OIDC.

@@ -6,43 +6,18 @@ body:
   - type: markdown
     attributes:
       value: |
-        Thanks for proposing an improvement. Prefer to discuss loose ideas first? Use [Discussions](https://github.com/JFolberth/ai-smoketest/discussions).
+        Prefer to discuss loose ideas first? Use [Discussions](https://github.com/JFolberth/ai-smoketest/discussions).
   - type: textarea
     id: problem
     attributes:
       label: Problem
-      description: What can't you do today? What's the smoke-test scenario that isn't well-served by the current action?
+      description: What can't you do today?
     validations:
       required: true
   - type: textarea
     id: proposal
     attributes:
-      label: Proposed API surface
-      description: What would the input, catalog field, or output look like? Include a worked example.
-      render: yaml
-    validations:
-      required: true
-  - type: textarea
-    id: alternatives
-    attributes:
-      label: Alternatives considered
-      description: Other approaches you thought about (including "keep working around it") and why they aren't sufficient.
-    validations:
-      required: false
-  - type: dropdown
-    id: semver
-    attributes:
-      label: Semver impact
-      description: If accepted, would this be a breaking change?
-      options:
-        - Patch (bug fix / docs)
-        - Minor (additive — new input, new field)
-        - Major (rename or remove an input, break catalog schema)
-    validations:
-      required: true
-  - type: textarea
-    id: extra
-    attributes:
-      label: Additional context
+      label: Proposal
+      description: Optional — sketch the input, catalog field, or output shape you have in mind.
     validations:
       required: false
