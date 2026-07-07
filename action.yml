@@ -1,0 +1,57 @@
+name: 'AI Smoke Test'
+author: 'John Folberth'
+description: 'Smoke-test an Azure AI Foundry hosted agent by POSTing prompts from a JSON catalog to its Responses endpoint and asserting on the returned text.'
+
+branding:
+  icon: activity
+  color: blue
+
+inputs:
+  project_endpoint:
+    description: 'Foundry project endpoint URL (e.g. https://<account>.services.ai.azure.com/api/projects/<project>).'
+    required: true
+  agent_name:
+    description: 'Name of the deployed hosted agent to smoke-test. Comma-separated to run the catalog against multiple agents in one invocation (e.g. "agent-a,agent-b").'
+    required: true
+  tests_file:
+    description: 'Path to the smoke-tests JSON catalog, relative to the caller repository root (checked out by actions/checkout).'
+    required: true
+  timeout:
+    description: 'Per-request timeout in seconds. Defaults to 120 to cover hosted-agent cold start.'
+    required: false
+    default: '120'
+
+runs:
+  using: composite
+  steps:
+    - name: Run smoke tests
+      shell: bash
+      env:
+        PROJECT_ENDPOINT: ${{ inputs.project_endpoint }}
+        AGENT_NAME: ${{ inputs.agent_name }}
+        TESTS_FILE: ${{ inputs.tests_file }}
+        TIMEOUT: ${{ inputs.timeout }}
+      run: |
+        set -euo pipefail
+
+        # Fan out comma-separated agent names into repeated --agent-name flags
+        # so callers can smoke-test multiple agents in one step.
+        agent_args=()
+        IFS=',' read -ra names <<< "$AGENT_NAME"
+        for name in "${names[@]}"; do
+          trimmed="$(echo "$name" | xargs)"
+          if [[ -n "$trimmed" ]]; then
+            agent_args+=(--agent-name "$trimmed")
+          fi
+        done
+
+        if [[ ${#agent_args[@]} -eq 0 ]]; then
+          echo "ERROR: agent_name input was empty after parsing" >&2
+          exit 2
+        fi
+
+        python3 "${GITHUB_ACTION_PATH}/scripts/smoke-tests.py" \
+          --project-endpoint "$PROJECT_ENDPOINT" \
+          "${agent_args[@]}" \
+          --tests-file "$TESTS_FILE" \
+          --timeout "$TIMEOUT"

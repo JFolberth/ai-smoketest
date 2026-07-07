@@ -1,0 +1,33 @@
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    labels:
+      - dependencies
+      - github-actions
+    groups:
+      github-actions:
+        patterns:
+          - "*"
+
+  - package-ecosystem: github-actions
+    directory: /examples
+    schedule:
+      interval: weekly
+    labels:
+      - dependencies
+      - github-actions
+    groups:
+      example-actions:
+        patterns:
+          - "*"
+
+  - package-ecosystem: pip
+    directory: /
+    schedule:
+      interval: weekly
+    labels:
+      - dependencies
+      - python

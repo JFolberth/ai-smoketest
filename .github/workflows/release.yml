@@ -1,0 +1,69 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Existing semver tag to (re-)publish (e.g. v1.0.1). Also refreshes the moving major tag.'
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Resolve release ref
+        id: ref
+        env:
+          INPUT_TAG: ${{ inputs.tag }}
+          EVENT_REF: ${{ github.ref }}
+        run: |
+          set -euo pipefail
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            TAG="$INPUT_TAG"
+          else
+            TAG="${EVENT_REF#refs/tags/}"
+          fi
+          if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "ERROR: tag '$TAG' is not semver (vMAJOR.MINOR.PATCH)" >&2
+            exit 1
+          fi
+          MAJOR="$(echo "$TAG" | sed -E 's/^v([0-9]+)\..*/v\1/')"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "major=$MAJOR" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          ref: ${{ steps.ref.outputs.tag }}
+          persist-credentials: true
+
+      - name: Move major tag
+        env:
+          TAG: ${{ steps.ref.outputs.tag }}
+          MAJOR: ${{ steps.ref.outputs.major }}
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -f "$MAJOR" "$TAG"
+          git push -f origin "$MAJOR"
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.ref.outputs.tag }}
+        run: |
+          set -euo pipefail
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "Release $TAG already exists — skipping create."
+          else
+            gh release create "$TAG" \
+              --title "$TAG" \
+              --generate-notes
+          fi

@@ -1,0 +1,81 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  lint-action:
+    name: Lint action metadata + workflows
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install actionlint
+        run: |
+          bash ./.devcontainer/install-actionlint.sh
+
+      - name: actionlint
+        run: actionlint -color
+
+      - name: yamllint
+        run: |
+          pip install --quiet yamllint
+          yamllint -d "{extends: default, rules: {line-length: disable, document-start: disable, truthy: {check-keys: false}, comments: {min-spaces-from-content: 1}, comments-indentation: disable}}" \
+            action.yml .github examples
+
+  lint-python:
+    name: Lint runner
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Install ruff
+        run: pip install --quiet ruff
+
+      - name: ruff check
+        run: ruff check scripts/ tests/
+
+      - name: compileall
+        run: python3 -m compileall -q scripts/
+
+  unit-tests:
+    name: Unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Install pytest
+        run: pip install --quiet pytest
+
+      - name: pytest
+        run: pytest tests/ -q
+
+  readme-inputs-sync:
+    name: README inputs match action.yml
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Install pyyaml
+        run: pip install --quiet pyyaml
+
+      - name: Check every action.yml input appears in README
+        run: python3 tests/check_readme_inputs.py

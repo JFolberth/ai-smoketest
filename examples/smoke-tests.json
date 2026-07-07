@@ -1,0 +1,31 @@
+{
+  "_comment": "Example smoke-test catalog for the ai-smoketest action. Each test POSTs a prompt to the agent's Responses endpoint and asserts case-insensitive substring rules on the reply. Threading: use `save_response_id_as` on one turn and `use_previous_response_id` on a later turn to chain replies; use `create_conversation_as` + `use_conversation` to bind turns to a platform-managed conversation resource. Replace these prompts and assertions with rules specific to your agent's system prompt.",
+  "tests": [
+    {
+      "id": "basic_response",
+      "description": "Agent returns a non-empty, in-domain answer.",
+      "prompt": "Say hello and tell me what you can help with.",
+      "assertions": {
+        "contains_any": ["hello", "hi", "help"]
+      }
+    },
+    {
+      "id": "thread_turn_1",
+      "description": "First turn of a multi-turn conversation; saves the response id for turn 2.",
+      "prompt": "My favourite colour is blue. Remember that.",
+      "assertions": {
+        "contains_any": ["blue", "noted", "remember"]
+      },
+      "save_response_id_as": "colour_thread"
+    },
+    {
+      "id": "thread_turn_2",
+      "description": "Second turn using previous_response_id; the agent must recall the colour from turn 1.",
+      "prompt": "What did I just tell you my favourite colour was?",
+      "use_previous_response_id": "colour_thread",
+      "assertions": {
+        "contains_any": ["blue"]
+      }
+    }
+  ]
+}
