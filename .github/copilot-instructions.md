@@ -1,6 +1,6 @@
 # ai-smoketest — Copilot Instructions
 
-A GitHub Marketplace Action that smoke-tests Azure AI Foundry hosted agents by POSTing prompts from a JSON catalog to the Responses data-plane endpoint and asserting on the reply text. Composite action + bundled stdlib-only Python runner.
+A GitHub Marketplace Action that smoke-tests Microsoft Foundry hosted agents by POSTing prompts from a JSON catalog to the Responses data-plane endpoint and asserting on the reply text. Composite action + bundled stdlib-only Python runner.
 
 ---
 
@@ -55,7 +55,7 @@ A clean live run prints `Summary: N/N passed across 1 agent(s)` and exits `0`. R
 - `action.yml` **must** stay at repo root. Moving it into a subdirectory removes the "Publish this Action to the GitHub Marketplace" checkbox from the Release page.
 - `action.yml` must declare all four Marketplace fields at the top level: `name`, `description`, `author`, `branding` (with both `icon` and `color`).
 - The `name` (`AI Smoke Test`) must be unique across the Marketplace. If a collision appears at publish time, fall back to `AI Agent Smoke Test`.
-- **`description` must be < 125 characters.** The Marketplace publish form rejects anything longer. Keep the current short form (`Smoke-test Azure AI Foundry hosted agents: POST prompts from a JSON catalog and assert on the reply text.`) unless a rewrite fits in the same budget.
+- **`description` must be < 125 characters.** The Marketplace publish form rejects anything longer. Keep the current short form (`Smoke-test Microsoft Foundry hosted agents: POST prompts from a JSON catalog and assert on the reply text.`) unless a rewrite fits in the same budget.
 - Never delete or rename `LICENSE` — Marketplace requires an OSI license file.
 
 ### Marketplace listing metadata (categories + tags)

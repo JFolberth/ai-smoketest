@@ -4,7 +4,7 @@
 [![CI](https://github.com/JFolberth/ai-smoketest/actions/workflows/ci.yml/badge.svg)](https://github.com/JFolberth/ai-smoketest/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
 
-Smoke-test an Azure AI Foundry hosted agent by POSTing prompts from a JSON catalog to its Responses endpoint and asserting on the returned text.
+Smoke-test a Microsoft Foundry hosted agent by POSTing prompts from a JSON catalog to its Responses endpoint and asserting on the returned text.
 
 Use this action as a post-deploy gate in your CI/CD: it fails the job the moment your hosted agent stops answering, drifts off its system prompt, breaks conversation threading, or returns malformed Responses payloads.
 
