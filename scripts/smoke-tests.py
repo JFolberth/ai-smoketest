@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Smoke-test runner for Azure AI Foundry hosted agents using the Responses protocol.
+"""Smoke-test runner for Microsoft Foundry hosted agents using the Responses protocol.
 
 Bundled with the `JFolberth/ai-smoketest` GitHub Action. Reads test cases from a
 JSON catalog supplied by the caller, POSTs each prompt to every supplied

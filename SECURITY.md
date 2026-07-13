@@ -23,7 +23,7 @@ In scope:
 
 Out of scope:
 
-- Vulnerabilities in Azure AI Foundry itself (report to Microsoft).
+- Vulnerabilities in Microsoft Foundry itself (report to Microsoft).
 - Vulnerabilities in the caller's workflow YAML (report to the caller).
 - The example catalog and sample workflow under `examples/`.
 

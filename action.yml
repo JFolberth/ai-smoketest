@@ -1,6 +1,6 @@
 name: 'AI Smoke Test'
 author: 'John Folberth'
-description: 'Smoke-test Azure AI Foundry hosted agents: POST prompts from a JSON catalog and assert on the reply text.'
+description: 'Smoke-test Microsoft Foundry hosted agents: POST prompts from a JSON catalog and assert on the reply text.'
 
 branding:
   icon: activity
